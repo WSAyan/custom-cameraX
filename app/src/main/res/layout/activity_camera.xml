@@ -149,6 +149,16 @@
             android:orientation="vertical"
             app:layout_constraintGuide_percent=".50" />
 
+        <View
+            android:id="@+id/cropAreaView"
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/endGuideLine"
+            app:layout_constraintStart_toStartOf="@id/startGuideLine"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

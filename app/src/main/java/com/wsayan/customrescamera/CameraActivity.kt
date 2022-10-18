@@ -1,9 +1,13 @@
 package com.wsayan.customrescamera
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.os.Bundle
+import android.util.DisplayMetrics
 import android.util.Log
+import android.util.Rational
 import android.util.Size
 import android.view.*
 import android.widget.Toast
@@ -18,6 +22,7 @@ import com.wsayan.customrescamera.databinding.ActivityCameraBinding
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
@@ -111,6 +116,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    @SuppressLint("RestrictedApi")
     private fun bindCameraUseCases() {
         val rotation = binding.viewFinder.display.rotation
 
@@ -128,9 +134,48 @@ class CameraActivity : AppCompatActivity() {
                 it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
             }
 
+
+        val scWidth = windowManager.defaultDisplay.width
+        val scHeight = windowManager.defaultDisplay.height
+
+        val ratWidth = scWidth.toFloat() / targetResolution.width
+        val ratHeight = scHeight.toFloat() / targetResolution.height
+
+        val width = (binding.cropAreaView.width.toFloat() / scWidth) * targetResolution.width
+        val height = (binding.cropAreaView.height.toFloat() / scHeight) * targetResolution.height
+
+        Log.e(
+            TAG,
+            "scwidth: $scWidth, scHeight: $scHeight, viewWidth: ${binding.cropAreaView.width}, viewHeight: ${binding.cropAreaView.height} , targetWidth: ${targetResolution.width}, targetHeight: ${targetResolution.height}, width: $width, height: $height"
+        )
+
         imageCapture = ImageCapture.Builder()
             .setTargetRotation(rotation)
             .setTargetResolution(targetResolution)
+            .build()
+
+        /*imageCapture?.setCropAspectRatio(
+            Rational(
+                width.toInt(),
+                height.toInt()
+            )
+        )*/
+
+        /*val rect = Rect(
+           binding.cropAreaView.left,
+            binding.cropAreaView.top,
+            binding.cropAreaView.right,
+            binding.cropAreaView.bottom
+        )
+
+        Log.e(
+            TAG,
+            "rectLeft = ${rect.left}, top = ${rect.top}, right = ${rect.right}, right = ${rect.bottom}"
+        )
+        imageCapture?.setViewPortCropRect(rect)*/
+
+
+        val imageAnalyzer = ImageAnalysis.Builder()
             .build()
 
         // Select back camera as a default
@@ -140,14 +185,27 @@ class CameraActivity : AppCompatActivity() {
             // Unbind use cases before rebinding
             cameraProvider?.unbindAll()
 
+            val viewPort = ViewPort.Builder(
+                Rational(
+                    binding.cropAreaView.width,
+                    binding.cropAreaView.height
+                ), Surface.ROTATION_0
+            ).build()
+
             val useCaseGroup = UseCaseGroup.Builder()
                 .addUseCase(preview ?: return)
+                .addUseCase(imageAnalyzer)
                 .addUseCase(imageCapture ?: return)
+                //.setViewPort(viewPort)
                 .build()
 
             // Bind use cases to camera
             val camera = cameraProvider?.bindToLifecycle(
                 this, cameraSelector, useCaseGroup
+            )
+
+            cameraProvider?.bindToLifecycle(
+                this, cameraSelector, preview, imageCapture, imageAnalyzer
             )
 
             camera?.let { handleUIEvents(it) }
