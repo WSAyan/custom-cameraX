@@ -5,9 +5,9 @@ import android.widget.ImageView
 import com.bumptech.glide.Glide
 import java.io.File
 
-fun Context.getOutputDirectory(): File {
+fun Context.getOutputDirectory(dirName: String): File {
     val mediaDir = externalMediaDirs.firstOrNull()?.let {
-        File(it, applicationContext.resources.getString(R.string.app_name)).apply { mkdirs() }
+        File(it, dirName).apply { mkdirs() }
     }
     return if (mediaDir != null && mediaDir.exists())
         mediaDir else applicationContext.filesDir

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import android.view.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
@@ -151,6 +152,9 @@ class CameraActivity : AppCompatActivity() {
 
             camera?.let { handleUIEvents(it) }
 
+            if (BuildConfig.DEBUG) {
+                camera?.cameraInfo?.let { observeCameraState(it) }
+            }
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
@@ -250,6 +254,121 @@ class CameraActivity : AppCompatActivity() {
 
     }
 
+    private fun observeCameraState(cameraInfo: CameraInfo) {
+        cameraInfo.cameraState.observe(this) { cameraState ->
+            run {
+                when (cameraState.type) {
+                    CameraState.Type.PENDING_OPEN -> {
+                        // Ask the user to close other camera apps
+                        Toast.makeText(
+                            this,
+                            "CameraState: Pending Open",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.Type.OPENING -> {
+                        // Show the Camera UI
+                        Toast.makeText(
+                            this,
+                            "CameraState: Opening",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.Type.OPEN -> {
+                        // Setup Camera resources and begin processing
+                        Toast.makeText(
+                            this,
+                            "CameraState: Open",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.Type.CLOSING -> {
+                        // Close camera UI
+                        Toast.makeText(
+                            this,
+                            "CameraState: Closing",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.Type.CLOSED -> {
+                        // Free camera resources
+                        Toast.makeText(
+                            this,
+                            "CameraState: Closed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+
+            cameraState.error?.let { error ->
+                when (error.code) {
+                    // Open errors
+                    CameraState.ERROR_STREAM_CONFIG -> {
+                        // Make sure to setup the use cases properly
+                        Toast.makeText(
+                            this,
+                            "Stream config error",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    // Opening errors
+                    CameraState.ERROR_CAMERA_IN_USE -> {
+                        // Close the camera or ask user to close another camera app that's using the
+                        // camera
+                        Toast.makeText(
+                            this,
+                            "Camera in use",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.ERROR_MAX_CAMERAS_IN_USE -> {
+                        // Close another open camera in the app, or ask the user to close another
+                        // camera app that's using the camera
+                        Toast.makeText(
+                            this,
+                            "Max cameras in use",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.ERROR_OTHER_RECOVERABLE_ERROR -> {
+                        Toast.makeText(
+                            this,
+                            "Other recoverable error",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    // Closing errors
+                    CameraState.ERROR_CAMERA_DISABLED -> {
+                        // Ask the user to enable the device's cameras
+                        Toast.makeText(
+                            this,
+                            "Camera disabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    CameraState.ERROR_CAMERA_FATAL_ERROR -> {
+                        // Ask the user to reboot the device to restore camera function
+                        Toast.makeText(
+                            this,
+                            "Fatal error",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    // Closed errors
+                    CameraState.ERROR_DO_NOT_DISTURB_MODE_ENABLED -> {
+                        // Ask the user to disable the "Do Not Disturb" mode, then reopen the camera
+                        Toast.makeText(
+                            this,
+                            "Do not disturb mode enabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
     companion object {
         private val TARGET_RESOLUTION = Size(412, 847)
         private val TARGET_RESOLUTION_LANDSCAPE = Size(847, 412)
@@ -287,7 +406,7 @@ class CameraActivity : AppCompatActivity() {
 
     private fun createFile(): File? {
         return try {
-            val path = this.getOutputDirectory()
+            val path = this.getOutputDirectory("photos")
 
             // creates folder if not present
             path.mkdir()
