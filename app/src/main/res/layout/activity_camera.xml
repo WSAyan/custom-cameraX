@@ -8,6 +8,26 @@
         android:layout_height="match_parent"
         android:background="@color/black">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/startGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="15dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/endGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="15dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/topGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="15dp" />
 
         <androidx.camera.view.PreviewView
             android:id="@+id/viewFinder"
@@ -21,21 +41,57 @@
         <View
             android:id="@+id/bottomView"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="0dp"
             android:background="@color/black"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/capBottomSpace"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/capTopSpace" />
 
         <ImageView
             android:id="@+id/captureIV"
             android:layout_width="70dp"
             android:layout_height="70dp"
+            android:foreground="?selectableItemBackground"
             android:src="@drawable/tiny_circle_2"
             app:layout_constraintBottom_toBottomOf="@id/bottomView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <ImageView
+            android:id="@+id/flashV"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/ic_baseline_flash_off_24"
+            app:layout_constraintBottom_toBottomOf="@id/bottomView"
+            app:layout_constraintEnd_toStartOf="@id/captureIV"
+            app:layout_constraintStart_toStartOf="@id/startGuideLine"
+            app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <ImageView
+            android:id="@+id/rotateIV"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/ic_baseline_cameraswitch_24"
+            app:layout_constraintBottom_toBottomOf="@id/bottomView"
+            app:layout_constraintEnd_toEndOf="@id/endGuideLine"
+            app:layout_constraintStart_toEndOf="@id/captureIV"
+            app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <Space
+            android:id="@+id/capTopSpace"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintBottom_toTopOf="@id/captureIV" />
+
+        <Space
+            android:id="@+id/capBottomSpace"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/oldGroup"
@@ -65,14 +121,14 @@
 
         <TextView
             android:id="@+id/titleTV"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="normal"
+            app:layout_constrainedWidth="true"
             app:layout_constraintBottom_toBottomOf="@id/topView"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/startGuideLine"
             app:layout_constraintTop_toTopOf="@id/topView"
             tools:text="Capture" />
 
@@ -80,10 +136,10 @@
             android:id="@+id/closeIV"
             android:layout_width="35dp"
             android:layout_height="35dp"
-            android:layout_marginEnd="14dp"
+            android:foreground="?selectableItemBackground"
             android:src="@drawable/ic_close_bttn"
             app:layout_constraintBottom_toBottomOf="@id/topView"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/endGuideLine"
             app:layout_constraintTop_toTopOf="@id/topView" />
 
         <androidx.constraintlayout.widget.Guideline

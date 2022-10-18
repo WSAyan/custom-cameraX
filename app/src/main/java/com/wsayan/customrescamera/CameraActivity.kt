@@ -1,6 +1,7 @@
 package com.wsayan.customrescamera
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
@@ -46,6 +47,24 @@ class CameraActivity : AppCompatActivity() {
         }.apply {
             enable()
         }
+
+        // Setup for button used to switch cameras
+        binding.rotateIV.let {
+
+            // Disable the button until the camera is set up
+            it.isEnabled = false
+
+            // Listener for button used to switch cameras. Only called if the button is enabled
+            it.setOnClickListener {
+                lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
+                    CameraSelector.LENS_FACING_BACK
+                } else {
+                    CameraSelector.LENS_FACING_FRONT
+                }
+                // Re-bind use cases to update selected camera
+                bindCameraUseCases()
+            }
+        }
     }
 
     private fun startCamera() {
@@ -64,6 +83,7 @@ class CameraActivity : AppCompatActivity() {
 
             bindCameraUseCases()
 
+            updateCameraSwitchButton()
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -118,16 +138,17 @@ class CameraActivity : AppCompatActivity() {
         val cameraInfo = camera.cameraInfo
 
         // Listen to pinch gestures
-        val simpleOnScaleGestureListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                pinchZoom(
-                    cameraControl = cameraControl,
-                    cameraInfo = cameraInfo,
-                    detector = detector
-                )
-                return true
+        val simpleOnScaleGestureListener =
+            object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                override fun onScale(detector: ScaleGestureDetector): Boolean {
+                    pinchZoom(
+                        cameraControl = cameraControl,
+                        cameraInfo = cameraInfo,
+                        detector = detector
+                    )
+                    return true
+                }
             }
-        }
 
         val scaleGestureDetector = ScaleGestureDetector(this, simpleOnScaleGestureListener)
 
@@ -259,5 +280,29 @@ class CameraActivity : AppCompatActivity() {
         return cameraProvider?.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
     }
 
+    private fun updateCameraSwitchButton() {
+        try {
+            binding.rotateIV.isEnabled = hasBackCamera() && hasFrontCamera()
+        } catch (exception: CameraInfoUnavailableException) {
+            binding.rotateIV.isEnabled = false
+        }
+    }
 
+    /**
+     * Inflate camera controls and update the UI manually upon config changes to avoid removing
+     * and re-adding the view finder from the view hierarchy; this provides a seamless rotation
+     * transition on devices that support it.
+     *
+     * NOTE: The flag is supported starting in Android 8 but there still is a small flash on the
+     * screen for devices that run Android 9 or below.
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        // Rebind the camera with the updated display metrics
+        bindCameraUseCases()
+
+        // Enable or disable switching between cameras
+        updateCameraSwitchButton()
+    }
 }
