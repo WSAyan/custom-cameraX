@@ -7,9 +7,12 @@ import android.util.Log
 import android.util.Size
 import android.view.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.wsayan.customrescamera.databinding.ActivityCameraBinding
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -22,6 +25,8 @@ class CameraActivity : AppCompatActivity() {
     private var cameraProvider: ProcessCameraProvider? = null
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
     private var preview: Preview? = null
+    private val _torchFlashEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
+    private var torchFlashEnabled: LiveData<Boolean> = _torchFlashEnabled
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +68,24 @@ class CameraActivity : AppCompatActivity() {
                 }
                 // Re-bind use cases to update selected camera
                 bindCameraUseCases()
+            }
+        }
+
+        torchFlashEnabled.observe(this) {
+            if (it) {
+                binding.flashIV.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.ic_baseline_flash_off_24
+                    )
+                )
+            } else {
+                binding.flashIV.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.ic_baseline_flash_on_24
+                    )
+                )
             }
         }
     }
@@ -126,16 +149,26 @@ class CameraActivity : AppCompatActivity() {
                 this, cameraSelector, useCaseGroup
             )
 
-            camera?.let { handleGestureEvents(it) }
+            camera?.let { handleUIEvents(it) }
 
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
 
-    private fun handleGestureEvents(camera: Camera) {
+    private fun toggleFlash(cameraControl: CameraControl) {
+        val isEnabled = !(_torchFlashEnabled.value ?: false)
+        _torchFlashEnabled.value = isEnabled
+        cameraControl.enableTorch(isEnabled)
+    }
+
+    private fun handleUIEvents(camera: Camera) {
         val cameraControl = camera.cameraControl
         val cameraInfo = camera.cameraInfo
+
+        binding.flashIV.setOnClickListener {
+            toggleFlash(cameraControl)
+        }
 
         // Listen to pinch gestures
         val simpleOnScaleGestureListener =

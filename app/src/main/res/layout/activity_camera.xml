@@ -60,7 +60,7 @@
             app:layout_constraintTop_toTopOf="@id/bottomView" />
 
         <ImageView
-            android:id="@+id/flashV"
+            android:id="@+id/flashIV"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:foreground="?selectableItemBackground"
