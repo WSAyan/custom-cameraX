@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black">
+
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/viewFinder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/bottomView"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:background="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/captureIV"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/tiny_circle_2"
+            app:layout_constraintBottom_toBottomOf="@id/bottomView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/oldGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="image_capture_button" />
+
+        <Button
+            android:id="@+id/image_capture_button"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="50dp"
+            android:elevation="2dp"
+            android:text="Take Photo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/vertical_centerline"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+        <View
+            android:id="@+id/topView"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/black"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/titleTV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            app:layout_constraintBottom_toBottomOf="@id/topView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/topView"
+            tools:text="Capture" />
+
+        <ImageView
+            android:id="@+id/closeIV"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="14dp"
+            android:src="@drawable/ic_close_bttn"
+            app:layout_constraintBottom_toBottomOf="@id/topView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/topView" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/vertical_centerline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".50" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
