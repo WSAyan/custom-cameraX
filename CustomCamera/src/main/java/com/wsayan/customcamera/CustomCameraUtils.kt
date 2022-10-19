@@ -1,4 +1,4 @@
-package com.wsayan.customrescamera
+package com.wsayan.customcamera
 
 import android.content.Context
 import android.graphics.Bitmap

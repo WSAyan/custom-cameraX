@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/customcam_black">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/startGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="15dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/endGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="15dp" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/topGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="15dp" />
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/viewFinder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/bottomView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/customcam_black"
+            app:layout_constraintBottom_toBottomOf="@id/capBottomSpace"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/capTopSpace" />
+
+        <ImageView
+            android:id="@+id/captureIV"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/customcam_tiny_circle_2"
+            app:layout_constraintBottom_toBottomOf="@id/bottomView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <ImageView
+            android:id="@+id/flashIV"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/customcam_ic_baseline_flash_off_24"
+            app:layout_constraintBottom_toBottomOf="@id/bottomView"
+            app:layout_constraintEnd_toStartOf="@id/captureIV"
+            app:layout_constraintStart_toStartOf="@id/startGuideLine"
+            app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <ImageView
+            android:id="@+id/rotateIV"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/customcam_ic_baseline_cameraswitch_24"
+            app:layout_constraintBottom_toBottomOf="@id/bottomView"
+            app:layout_constraintEnd_toEndOf="@id/endGuideLine"
+            app:layout_constraintStart_toEndOf="@id/captureIV"
+            app:layout_constraintTop_toTopOf="@id/bottomView" />
+
+        <Space
+            android:id="@+id/capTopSpace"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintBottom_toTopOf="@id/captureIV" />
+
+        <Space
+            android:id="@+id/capBottomSpace"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/oldGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="image_capture_button" />
+
+        <Button
+            android:id="@+id/image_capture_button"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginBottom="50dp"
+            android:elevation="2dp"
+            android:text="Take Photo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/vertical_centerline"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+        <View
+            android:id="@+id/topView"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/customcam_black"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/titleTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/customcam_white"
+            android:textSize="14sp"
+            android:textStyle="normal"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="@id/topView"
+            app:layout_constraintStart_toStartOf="@id/startGuideLine"
+            app:layout_constraintTop_toTopOf="@id/topView"
+            tools:text="Capture" />
+
+        <ImageView
+            android:id="@+id/closeIV"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/customcam_ic_close_bttn"
+            app:layout_constraintBottom_toBottomOf="@id/topView"
+            app:layout_constraintEnd_toEndOf="@id/endGuideLine"
+            app:layout_constraintTop_toTopOf="@id/topView" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/vertical_centerline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent=".50" />
+
+        <View
+            android:id="@+id/cropAreaView"
+            android:layout_width="300dp"
+            android:layout_height="200dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/endGuideLine"
+            app:layout_constraintStart_toStartOf="@id/startGuideLine"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/cropAreaTopView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/cropAreaView"
+            app:layout_constraintEnd_toStartOf="@id/cropAreaEndView"
+            app:layout_constraintStart_toEndOf="@id/cropAreaStartView"
+            app:layout_constraintTop_toBottomOf="@id/topView" />
+
+        <View
+            android:id="@+id/cropAreaStartView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/bottomView"
+            app:layout_constraintEnd_toStartOf="@id/cropAreaView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/topView" />
+
+        <View
+            android:id="@+id/cropAreaEndView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/bottomView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cropAreaView"
+            app:layout_constraintTop_toBottomOf="@id/topView" />
+
+        <View
+            android:id="@+id/cropAreaBottomView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/bottomView"
+            app:layout_constraintEnd_toStartOf="@id/cropAreaEndView"
+            app:layout_constraintStart_toEndOf="@id/cropAreaStartView"
+            app:layout_constraintTop_toBottomOf="@id/cropAreaView" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/cropGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="cropAreaTopView,cropAreaBottomView, cropAreaEndView, cropAreaStartView,cropAreaView" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

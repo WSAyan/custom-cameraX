@@ -1,13 +1,14 @@
-package com.wsayan.customrescamera
+package com.wsayan.customcamera
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.opengl.Visibility
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.util.Rational
 import android.util.Size
 import android.view.*
 import android.widget.Toast
@@ -15,19 +16,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.wsayan.customrescamera.databinding.ActivityCameraBinding
+import com.wsayan.customcamera.databinding.CustomcamActivityMainBinding
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
 class CameraActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityCameraBinding
+    private lateinit var binding: CustomcamActivityMainBinding
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var cameraProvider: ProcessCameraProvider? = null
@@ -42,10 +44,12 @@ class CameraActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityCameraBinding.inflate(layoutInflater)
+        binding = CustomcamActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initScreen()
+        ActivityCompat.requestPermissions(
+            this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+        )
     }
 
     private fun initScreen() {
@@ -157,14 +161,14 @@ class CameraActivity : AppCompatActivity() {
                 binding.flashIV.setImageDrawable(
                     AppCompatResources.getDrawable(
                         this,
-                        R.drawable.ic_baseline_flash_off_24
+                        R.drawable.customcam_ic_baseline_flash_off_24
                     )
                 )
             } else {
                 binding.flashIV.setImageDrawable(
                     AppCompatResources.getDrawable(
                         this,
-                        R.drawable.ic_baseline_flash_on_24
+                        R.drawable.customcam_ic_baseline_flash_on_24
                     )
                 )
             }
@@ -488,6 +492,19 @@ class CameraActivity : AppCompatActivity() {
         const val CAMERA_ACTIVITY_REQUEST_CODE = 5000
         const val CAPTURED_IMAGE_KEY = "_captured_image"
         const val INITIAL_PARAMS_KEY = "_initial_params"
+
+        private const val REQUEST_CODE_PERMISSIONS = 10
+
+        private val REQUIRED_PERMISSIONS =
+            mutableListOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ).apply {
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+            }.toTypedArray()
     }
 
 
@@ -569,5 +586,30 @@ class CameraActivity : AppCompatActivity() {
 
         // Enable or disable switching between cameras
         updateCameraSwitchButton()
+    }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(
+            baseContext, it
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                initScreen()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
+            }
+        }
     }
 }
