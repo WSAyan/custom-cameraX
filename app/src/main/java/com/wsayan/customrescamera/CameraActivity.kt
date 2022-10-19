@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.util.Rational
@@ -34,6 +35,9 @@ class CameraActivity : AppCompatActivity() {
     private var preview: Preview? = null
     private val _torchFlashEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
     private var torchFlashEnabled: LiveData<Boolean> = _torchFlashEnabled
+    private var cameraInitializeInfo: CameraInitializeInfo? = null
+    private var targetResolutionPortrait: Size? = null
+    private var targetResolutionLandscape: Size? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +45,31 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.titleTV.text = "Capture photo"
+        initScreen()
+    }
+
+    private fun initScreen() {
+        cameraInitializeInfo = intent.getParcelableExtra(INITIAL_PARAMS_KEY)
+
+        lensFacing = cameraInitializeInfo?.defaultLensFacing ?: CameraSelector.LENS_FACING_BACK
+
+        cameraInitializeInfo?.customResolutionWidth?.let { width ->
+            cameraInitializeInfo?.customResolutionHeight?.let { height ->
+                setTargetResolution(
+                    width,
+                    height
+                )
+            }
+        }
+
+        showTitle(cameraInitializeInfo?.title ?: "Capture photo")
+
+        cardCropperVisibility(cameraInitializeInfo?.hasCardCropper == true)
+
+        flashButtonVisibility(cameraInitializeInfo?.hasFlashOption == true)
+
+        rotateCameraButtonVisibility(cameraInitializeInfo?.hasSwitchCameraOption == true)
+
         binding.closeIV.setOnClickListener {
             finish()
         }
@@ -52,6 +80,41 @@ class CameraActivity : AppCompatActivity() {
 
         binding.captureIV.setOnClickListener { takePhoto() }
 
+        orientationListener()
+
+        rotateCameraAction()
+
+        observeTorchFlashState()
+    }
+
+    private fun setTargetResolution(width: Int, height: Int) {
+        targetResolutionPortrait = Size(width, height)
+
+        targetResolutionLandscape = Size(height, width)
+    }
+
+    private fun showTitle(title: String) {
+        binding.titleTV.text = title
+    }
+
+    private fun cardCropperVisibility(makeVisible: Boolean) {
+        if (makeVisible) {
+            binding.cropGroup.visibility = View.VISIBLE
+        } else {
+            binding.cropGroup.visibility = View.GONE
+        }
+    }
+
+    private fun flashButtonVisibility(makeVisible: Boolean) {
+        if (makeVisible) {
+            binding.flashIV.visibility = View.VISIBLE
+        } else {
+            binding.flashIV.visibility = View.GONE
+        }
+    }
+
+
+    private fun orientationListener() {
         val orientationEventListener = object : OrientationEventListener(this) {
             override fun onOrientationChanged(orientation: Int) {
                 imageCapture?.targetRotation = getOrientationFromDegrees(orientation)
@@ -59,8 +122,17 @@ class CameraActivity : AppCompatActivity() {
         }.apply {
             enable()
         }
+    }
 
-        // Setup for button used to switch cameras
+    private fun rotateCameraButtonVisibility(makeVisible: Boolean) {
+        if (makeVisible) {
+            binding.rotateIV.visibility = View.VISIBLE
+        } else {
+            binding.rotateIV.visibility = View.GONE
+        }
+    }
+
+    private fun rotateCameraAction() {
         binding.rotateIV.let {
 
             // Disable the button until the camera is set up
@@ -77,7 +149,9 @@ class CameraActivity : AppCompatActivity() {
                 bindCameraUseCases()
             }
         }
+    }
 
+    private fun observeTorchFlashState() {
         torchFlashEnabled.observe(this) {
             if (it) {
                 binding.flashIV.setImageDrawable(
@@ -123,21 +197,36 @@ class CameraActivity : AppCompatActivity() {
         val isLandscape = rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270
 
         val targetResolution =
-            if (isLandscape) TARGET_RESOLUTION_LANDSCAPE else TARGET_RESOLUTION
+            if (isLandscape) targetResolutionLandscape else targetResolutionPortrait
 
         // Preview
-        preview = Preview.Builder()
-            .setTargetRotation(rotation)
-            .setTargetResolution(targetResolution)
-            .build()
-            .also {
-                it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-            }
+        preview = if (targetResolution != null) {
+            Preview.Builder()
+                .setTargetRotation(rotation)
+                .setTargetResolution(targetResolution)
+                .build()
+                .also {
+                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                }
+        } else {
+            Preview.Builder()
+                .setTargetRotation(rotation)
+                .build()
+                .also {
+                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                }
+        }
 
-        imageCapture = ImageCapture.Builder()
-            .setTargetRotation(rotation)
-            .setTargetResolution(targetResolution)
-            .build()
+        imageCapture = if (targetResolution != null) {
+            ImageCapture.Builder()
+                .setTargetRotation(rotation)
+                .setTargetResolution(targetResolution)
+                .build()
+        } else {
+            ImageCapture.Builder()
+                .setTargetRotation(rotation)
+                .build()
+        }
 
         val imageAnalyzer = ImageAnalysis.Builder()
             .build()
@@ -149,18 +238,10 @@ class CameraActivity : AppCompatActivity() {
             // Unbind use cases before rebinding
             cameraProvider?.unbindAll()
 
-            val viewPort = ViewPort.Builder(
-                Rational(
-                    binding.cropAreaView.width,
-                    binding.cropAreaView.height
-                ), Surface.ROTATION_0
-            ).build()
-
             val useCaseGroup = UseCaseGroup.Builder()
                 .addUseCase(preview ?: return)
                 .addUseCase(imageAnalyzer)
                 .addUseCase(imageCapture ?: return)
-                //.setViewPort(viewPort)
                 .build()
 
             // Bind use cases to camera
@@ -265,13 +346,15 @@ class CameraActivity : AppCompatActivity() {
                         val msg = "Photo capture succeeded: ${output.savedUri}"
                         Log.d(TAG, msg)
 
-                        output.savedUri?.apply {
-                            cropSavedImage(this)
+                        if (cameraInitializeInfo?.hasCardCropper == true) {
+                            output.savedUri?.apply {
+                                cropSavedImage(this)
+                            }
                         }
 
                         val intent = Intent()
-                        intent.putExtra(IMAGE_EXTRA_KEY, output.savedUri)
-                        setResult(ACTIVITY_REQUEST_CODE, intent)
+                        intent.putExtra(CAPTURED_IMAGE_KEY, output.savedUri)
+                        setResult(CAMERA_ACTIVITY_REQUEST_CODE, intent)
                         finish()
                     }
                 }
@@ -401,11 +484,10 @@ class CameraActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TARGET_RESOLUTION = Size(412, 847)
-        private val TARGET_RESOLUTION_LANDSCAPE = Size(847, 412)
-        private const val TAG = "CameraXApp"
-        const val ACTIVITY_REQUEST_CODE = 100
-        const val IMAGE_EXTRA_KEY = "_image_extra"
+        private const val TAG = "CustomCamera"
+        const val CAMERA_ACTIVITY_REQUEST_CODE = 5000
+        const val CAPTURED_IMAGE_KEY = "_captured_image"
+        const val INITIAL_PARAMS_KEY = "_initial_params"
     }
 
 
