@@ -153,12 +153,56 @@
             android:id="@+id/cropAreaView"
             android:layout_width="300dp"
             android:layout_height="200dp"
-            android:background="#330bc0c9"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@id/endGuideLine"
             app:layout_constraintStart_toStartOf="@id/startGuideLine"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <View
+            android:id="@+id/cropAreaTopView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/cropAreaView"
+            app:layout_constraintEnd_toStartOf="@id/cropAreaEndView"
+            app:layout_constraintStart_toEndOf="@id/cropAreaStartView"
+            app:layout_constraintTop_toBottomOf="@id/topView" />
+
+        <View
+            android:id="@+id/cropAreaStartView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/bottomView"
+            app:layout_constraintEnd_toStartOf="@id/cropAreaView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/topView" />
+
+        <View
+            android:id="@+id/cropAreaEndView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/bottomView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cropAreaView"
+            app:layout_constraintTop_toBottomOf="@id/topView" />
+
+        <View
+            android:id="@+id/cropAreaBottomView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="#330bc0c9"
+            app:layout_constraintBottom_toTopOf="@id/bottomView"
+            app:layout_constraintEnd_toStartOf="@id/cropAreaEndView"
+            app:layout_constraintStart_toEndOf="@id/cropAreaStartView"
+            app:layout_constraintTop_toBottomOf="@id/cropAreaView" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/cropGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="cropAreaTopView,cropAreaBottomView, cropAreaEndView, cropAreaStartView,cropAreaView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

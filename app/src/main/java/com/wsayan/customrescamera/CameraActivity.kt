@@ -1,11 +1,10 @@
 package com.wsayan.customrescamera
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Rect
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
-import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Rational
 import android.util.Size
@@ -16,6 +15,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.wsayan.customrescamera.databinding.ActivityCameraBinding
@@ -116,7 +117,6 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    @SuppressLint("RestrictedApi")
     private fun bindCameraUseCases() {
         val rotation = binding.viewFinder.display.rotation
 
@@ -134,46 +134,10 @@ class CameraActivity : AppCompatActivity() {
                 it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
             }
 
-
-        val scWidth = windowManager.defaultDisplay.width
-        val scHeight = windowManager.defaultDisplay.height
-
-        val ratWidth = scWidth.toFloat() / targetResolution.width
-        val ratHeight = scHeight.toFloat() / targetResolution.height
-
-        val width = (binding.cropAreaView.width.toFloat() / scWidth) * targetResolution.width
-        val height = (binding.cropAreaView.height.toFloat() / scHeight) * targetResolution.height
-
-        Log.e(
-            TAG,
-            "scwidth: $scWidth, scHeight: $scHeight, viewWidth: ${binding.cropAreaView.width}, viewHeight: ${binding.cropAreaView.height} , targetWidth: ${targetResolution.width}, targetHeight: ${targetResolution.height}, width: $width, height: $height"
-        )
-
         imageCapture = ImageCapture.Builder()
             .setTargetRotation(rotation)
             .setTargetResolution(targetResolution)
             .build()
-
-        /*imageCapture?.setCropAspectRatio(
-            Rational(
-                width.toInt(),
-                height.toInt()
-            )
-        )*/
-
-        /*val rect = Rect(
-           binding.cropAreaView.left,
-            binding.cropAreaView.top,
-            binding.cropAreaView.right,
-            binding.cropAreaView.bottom
-        )
-
-        Log.e(
-            TAG,
-            "rectLeft = ${rect.left}, top = ${rect.top}, right = ${rect.right}, right = ${rect.bottom}"
-        )
-        imageCapture?.setViewPortCropRect(rect)*/
-
 
         val imageAnalyzer = ImageAnalysis.Builder()
             .build()
@@ -301,6 +265,10 @@ class CameraActivity : AppCompatActivity() {
                         val msg = "Photo capture succeeded: ${output.savedUri}"
                         Log.d(TAG, msg)
 
+                        output.savedUri?.apply {
+                            cropSavedImage(this)
+                        }
+
                         val intent = Intent()
                         intent.putExtra(IMAGE_EXTRA_KEY, output.savedUri)
                         setResult(ACTIVITY_REQUEST_CODE, intent)
@@ -309,7 +277,12 @@ class CameraActivity : AppCompatActivity() {
                 }
             )
         }
+    }
 
+    private fun cropSavedImage(uri: Uri): Uri {
+        val bitmap = BitmapFactory.decodeFile(uri.path)
+        val byteArray = cropImage(bitmap, binding.root, binding.cropAreaView)
+        return uri.toFile().saveCroppedImage(this@CameraActivity, byteArray).toUri()
     }
 
     private fun observeCameraState(cameraInfo: CameraInfo) {
