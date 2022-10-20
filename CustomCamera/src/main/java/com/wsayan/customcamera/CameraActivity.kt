@@ -74,7 +74,7 @@ class CameraActivity : AppCompatActivity() {
 
         rotateCameraButtonVisibility(cameraInitializeInfo?.hasSwitchCameraOption == true)
 
-        binding.closeIV.setOnClickListener {
+        binding.closeIV.setSafeOnClickListener {
             finish()
         }
 
@@ -82,7 +82,7 @@ class CameraActivity : AppCompatActivity() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        binding.captureIV.setOnClickListener { takePhoto() }
+        binding.captureIV.setSafeOnClickListener { takePhoto() }
 
         orientationListener()
 
@@ -143,7 +143,7 @@ class CameraActivity : AppCompatActivity() {
             it.isEnabled = false
 
             // Listener for button used to switch cameras. Only called if the button is enabled
-            it.setOnClickListener {
+            it.setSafeOnClickListener {
                 lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
                     CameraSelector.LENS_FACING_BACK
                 } else {
@@ -277,7 +277,7 @@ class CameraActivity : AppCompatActivity() {
         val cameraControl = camera.cameraControl
         val cameraInfo = camera.cameraInfo
 
-        binding.flashIV.setOnClickListener {
+        binding.flashIV.setSafeOnClickListener {
             toggleFlash(cameraControl)
         }
 
